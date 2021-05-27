@@ -30,11 +30,18 @@ Following is the code and answers for the questions under the "Question 1" Secti
 Following is the code and answers for the questions under the "Question 2" Section - as instructed in the assignment:
 
 ### Q2.1
-# TODO
-
+Why the mapped reads are mapped preferentially to exons?
+# TODO - write better
+The mapped reads are mapped preferentially to exons since during the process of splicing the introns are being removed from the RNA.
+In the final product (the RNA molecule) there are only exons, therefore the read are mapped to the exons.
 
 ### Q2.2
+Sometimes if we map RNA-seq reads of certain tissue samples and we look on certain genes we will see that reads are also mapped to the intronic region. What can be biological cause/reason for such an observation? 
 # TODO
+A biological reason for reads being mapped to the intronic region during the RNA-seq process is that
+#EDEN's
+that when the method is polyA-selection and we also have non-coding RNA in the mRNA then we can see reads that are mapped to the intronic region.
+
 
 ### Q2.3
 ### Q2.3.1
@@ -61,7 +68,12 @@ MARCHF7
 AXO
 
 These gene names were extracted from the following databases:
-#TODO
+HGNC - the HUGO Gene Nomenclature Committee database
+Ensembl genome database
+UniProt database
+NCBI's Entrez molecular sequence database
+OMIM - Online Mendelian Inheritance in Man database
+
 
 ### Q2.3.2
 If we paste the name of this gene manually into an Excel sheet, meaning we paste "MARCH7" into a cell inside the sheet, a possible problem we might encounter is that Excel would recognize the name as a date - March 7 - and refer to it as one.
@@ -91,7 +103,7 @@ sdy <- readRDS("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_Bio
 #print(t(sdy$expr))
 data <- na.omit(t(sdy$expr))
 data.scaled <- scale(data)
-#view(data)
+#view(data.scaled)
 #dist.mat <- dist(data)
 
 # preparing tsne for later
@@ -116,8 +128,106 @@ dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 #dbscan.result
 
 
+
+
+#Q3.2+3.3
+
+# kmeans
+#k=2
+km.result <- kmeans(data.scaled, centers = 2, nstart = 25)
+plot(tsne$Y, col=km.result$cluster, main = "k-means - k=2")
+#k=3
+km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
+plot(tsne$Y, col=km.result$cluster, main = "k-means - k=3")
+#k=4
+km.result <- kmeans(data.scaled, centers = 4, nstart = 25)
+plot(tsne$Y, col=km.result$cluster, main = "k-means - k=4")
+#k=5
+km.result <- kmeans(data.scaled, centers = 5, nstart = 25)
+plot(tsne$Y, col=km.result$cluster, main = "k-means - k=5")
+
+
+# hierarchical clustering
+#method="ward.D"
+hc.result <- hclust(dist(data.scaled), "ward.D")
+plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=ward.D")
+plot(hc.result)
+#method="ave"
+hc.result <- hclust(dist(data.scaled), "ave")
+plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=average")
+plot(hc.result)
+#method="ward.D2"
+hc.result <- hclust(dist(data.scaled), "ward.D2")
+plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=ward.D2")
+plot(hc.result)
+#method="centroid"
+hc.result <- hclust(dist(data.scaled), "centroid")
+plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=centroid")
+plot(hc.result)
+
+
+# DBSCAN
+#eps=1,minpts=4
+dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
+plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=1, minpts=4")
+#eps=0.5,minpts=4
+dbscan.result <- dbscan(tsne$Y, eps = 0.5, minPts = 4)
+plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=4")
+#eps=1,minpts=6
+dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 6)
+plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=1, minpts=6")
+#eps=0.5,minpts=6
+dbscan.result <- dbscan(tsne$Y, eps = 0.5, minPts = 6)
+plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=6")
+
+
+
+
+# plotting to hclust dendrogram
+#plot(hc.result)
+
+
 ```
 
 
-order
-cluster
+# Q3.3
+The method in hclust() that seems to give a clustering that is more accurate to the tSNE plot is ????.
+
+# Q3.4
+
+# TODO - write the code for rand.index
+
+Did you get the same or different clusters using the three techniques? Find ways to present the similarities and differences between the clusterings. If the clusters are different what can explain the difference?
+
+Answer: the clusters are different.
+reasons-
+the method that each clustering technique uses is different way to cluster
+the similarity is because the data is small
+
+
+# Q3.5
+find who belongs to each cluster
+show it on a graph
+
+```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
+
+sample_info <- readCSV("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_BioInf-Spr21-HW2/sample_info.csv")
+
+# new kmeans?
+
+# maybe with boxplot? and not ggplot?
+#AGE
+ggplot(sample_info, aes(x=km.result$cluster, y=AGE, group = km.result$cluster)) + geom_boxplot()
+#RACE
+table(sample_info$RACE, km.result$cluster)
+#GENDER
+table(sample_info$GENDER, km.result$cluster)
+
+```
+
+
+# Q3.5
+explain the results
+
+
+
