@@ -86,7 +86,6 @@ We began by preparing and cleaning the data in order to use it correctly - meani
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
 # Data Preperation
-#change to relative path?
 sdy <- readRDS("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_BioInf-Spr21-HW2/sdy420.rds")
 data <- na.omit(t(sdy$expr))
 data.scaled <- scale(data)
@@ -101,11 +100,10 @@ Now, we moved on to do the real work - and clustered our cleaned data in 3 diffe
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
 set.seed(555)
-
 # K-Means
 km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
 # hClust
-hc.result <- hclust(data.dist, "ward.D")
+hc.result <- hclust(data.dist, "average")
 # DBSCAN
 dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
@@ -115,7 +113,7 @@ dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
 You may see below our efforts to find the best parameters for each of the clustering methods. That includes parameters tuning (using different parameters for each method), and plotting our results.
 
-Note: as opposed to different methods to set our parameters we found along the way, we decided that we would like to try the exploratory approach - meaning we tried to find the best parameters for each clustering method by looking at our data mainly visually.
+*Note*: as opposed to different methods to set our parameters we came across along the way, we decided that we would like to try the exploratory approach - meaning we tried to find the best parameters for each clustering method by looking at our data mainly visually.  
 
 *K-Means*
 
@@ -132,7 +130,8 @@ for(k in k_values){
 
 ```
 
-Looking at the plots, it seems that the number of clusters that will give us with the most accurate clustering is K=7, as it provides the best visual separation out of all of the K's we tried.
+Looking at the plots, it seems that the number of clusters that will give us with the most accurate clustering is **K=7**, as it provides the best visual separation out of all of the K's we tried.  
+
 
 *Hierarchical clustering*
 
@@ -156,7 +155,8 @@ for(m in method_values){
 
 ```
 
-Once again, it seems that K=7 gives us the best result (more on it in Q3.3).
+Once again, it seems that **K=7** gives us the best result (more on it in *Q3.3*).  
+
 
 *DBSCAN*
 
@@ -174,33 +174,34 @@ for(e in eps_values){
 
 ```
 
-This time, the plots shows us that the number of clusters that will give us with the most accurate clustering is 6, while the parameters are: epsilon = 1, minPts = 6. Clustering using these parameters provides us with clusters that seems to be as far apart from each other, while also having the points in eacch cluster closest to each other.
+Once more, the plots shows us that the number of clusters that will give us with the most accurate clustering is **K=7**, while the parameters are: epsilon = 1, minPts = 6. Clustering using these parameters provides us with clusters that seems to be as far apart from each other, while also having the points in eacch cluster closest to each other.
 
-# Q3.3
-The method in hclust() that seems to give a clustering that is more accurate to the tSNE plot is" "ward.D2", using k=7 ("cutting" the dendrogram into 7 different clusters). The dendrogram using these parameters will look as following:
+### Q3.3
+The method in hclust() that seems to give a clustering that is more accurate to the tSNE plot is **"ward.D2"**, using **k=7** ("cutting" the dendrogram into 7 different clusters).  
+The dendrogram using these parameters will look as following:
 
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
 # plotting a dendrogram - for our best k only
 best_k <- 7
 plot(hc.result, cex = 0.6, hang = -1)
-rect.hclust(hc.result, k = best_k, border = 2:5)
+rect.hclust(hc.result, k = best_k, border = 1:7)
 
 ```
 
-
-# Q3.4
+### Q3.4
 
 In order to find the level of similarity of the 3 clustering techniques we used, we chose to use the function "rand.index" in the "fossil" library.
-This function allows us to understand how "close" clusters are to one another - the closer the result of the function is to 1 (on a scale from 0 to 1, while 1 means that the clusters are identical), the similar the clusters are to one another.
+This function allows us to understand how "close" clusters are to one another - the closer the result of the function is to 1 (on a scale from 0 to 1, while 1 means that the clusters are identical), the similar the clusters are to one another.  
 
-We used this function for each clustering method using the parameters that provided us the best clustering results in Q3.2.
+We used this function for each clustering method using the parameters that provided us the best clustering results in *Q3.2*.
 
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
 # Clustering with the best parameters
+# K-Means
 km.result <- kmeans(data.scaled, centers = 7, nstart = 25)
-# hierarchical clustering
+# Hierarchical clustering
 hc.result <- hclust(data.dist, "ward.D2")
 hc.cluster <- cutree(hc.result, k=7)
 # DBSCAN
@@ -220,11 +221,11 @@ The similarity between the clusters might be caused by the size of the dataset -
 On the other hand, the difference between the clusters can be explained by the way that each clustering algorithm works. Each clustering technique has different rules on determining how data-points are divided into each cluster, and that could cause data-points that are on the "edge" of more than one cluster to be divided into different clusters using different algorithms.
 
 
-# Q3.5
+### Q3.5
 
 Last but not least, we tried to identify a connection between clusters and the demographic data provided to us in "samples_info".
 
-To determine whether there is such a connection for any of the demographic variables, we experimented with different clustering methods and parameters, and finally chose to explain it with a *K-Means* clustering, as K=4.
+To determine whether there is such a connection for any of the demographic variables, we experimented with different clustering methods and parameters, and finally chose to explain it with a *K-Means* clustering, as *K=4*:
 
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
@@ -235,7 +236,7 @@ set.seed(555)
 km.result <- kmeans(data.scaled, centers = 4, nstart = 25)
 
 # AGE
-ggplot(sample_info, aes(x=km.result$cluster, y=AGE, group = km.result$cluster)) + geom_boxplot()
+ggplot(sample_info, aes(x=km.result$cluster, y=AGE, group=km.result$cluster)) + geom_boxplot()
 # RACE
 table(sample_info$RACE, km.result$cluster)
 # GENDER
@@ -243,8 +244,9 @@ table(sample_info$GENDER, km.result$cluster)
 
 ```
 
-As can be seen in the tables, it seems that **RACE** and **GENDER** do not expalin the clusters that were chosen by the algorithm-
-*GENDER* - expect for **cluster number 2 **, the number of samples in each cluster, divided into "Male" and "Female", is almost identical. Even in cluster number 2 the difference doesn't seems as significant.
-*RACE* - the same goes for RACE. The main difference here is that we can see that there seems to be an anomaly in **cluster number 4**, that, for some reason, does not contain the same proportion of "Asian" categorized samples as the in the other clusters. Unfortunately, we could not find a meaningful explanation for it.
-
-When We look at the "AGE" variable, we *do* see a meaningful separation between clusters - cluster 3, which consists of one sample, is of "AGE" higher than the rest (~84). Cluster 2 samples' median "AGE" is ~73, cluster 1's is ~62, and cluster 4's is ~57. As it obviously not unambiguous, we do think that this variable holds within it some explanation as to why did the 4 clusters were divided as they were.
+As can be seen in the tables, it seems that *RACE* and *GENDER* do not explain the clusters that were chosen by the algorithm-  
+**GENDER** - except for *cluster number 2*, the number of samples in each cluster, divided into "Male" and "Female", is almost identical. Even in cluster number 2 the difference doesn't seems as significant.  
+**RACE** - the same goes for RACE. The main difference here is that we can see that there seems to be an anomaly in *cluster number 4*, that, for some reason, does not contain the same proportion of "Asian" categorized samples as the in the other clusters. Unfortunately, we could not find a meaningful explanation for it.  
+  
+  
+When we look at the **"AGE"** variable, we **do** see a meaningful separation between clusters - cluster 3, which consists of one sample, is of "AGE" higher than the rest (~84). Cluster 2 samples' median "AGE" is ~73, cluster 1's is ~62, and cluster 4's is ~57. As it obviously not unambiguous, we do think that this variable holds within it some explanation as to why did the 4 clusters were divided as they were.
