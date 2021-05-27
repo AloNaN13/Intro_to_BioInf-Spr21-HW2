@@ -1,6 +1,6 @@
 ---
 title: "236523 - Introduction to Bioinformatics - Spring 21 - HW2"
-author: "Alon Hacohen & Roy Bernea"
+author: "Alon Hacohen (311587653) & Roy Bernea (316315829)"
 date: "5/27/2021"
 output:
   word_document: default
@@ -13,94 +13,6 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-Roy Bernea - 316315829 ; Alon Hacohen - 311587653
-
-# Qusetion 1
-
-Following is the code and answers for the questions under the "Question 1" Section - as instructed in the assignment:
-
-```{r,echo=FALSE} 
-invisible(library("EnhancedVolcano"))
-invisible(library("DESeq2"))
-invisible(library("pheatmap"))
-invisible(library("RColorBrewer"))
-
-```
-
-
-### Q1.2
-The dataset represents the difference in gene expression between three different kinds of of human melanoma cells and a regular melanocytes cell (normal skin cell).
-
-### Q1.3
-```{r Q1.3}
-c1<-c("GSM2344965", "GSM2344966", "GSM2344967", "GSM2344968", "GSM2344969", "GSM2344970", "GSM2344971", "GSM2344972", "GSM2344973", "GSM2344974", "GSM2344975", "GSM2344976")
-
-c2<-c("FM","FM","FM","SK_MEL_28","SK_MEL_28","SK_MEL_28","SK_MEL_147","SK_MEL_147","SK_MEL_147","UACC_62","UACC_62","UACC_62")
-
-c3<-c("normal","normal","normal","cancer","cancer","cancer","cancer","cancer","cancer","cancer","cancer","cancer")
-
-coldata <-cbind(ID=c1,line_type=c2,condition=c3)
-
-coldata
-```
-
-### Q1.4
-```{r Q1.4}
-c1<-c("GSM2344965","GSM2344966", "GSM2344968","GSM2344969", "GSM2344971","GSM2344972", "GSM2344974","GSM2344975")
-
-c2<-c("FM","FM","SK_MEL_28","SK_MEL_28","SK_MEL_147","SK_MEL_147","UACC_62","UACC_62")
-
-c3<-c("normal","normal","cancer","cancer","cancer","cancer","cancer","cancer")
-
-coldata <-cbind(ID=c1,line_type=c2,condition=c3)
-
-cts_prime <- as.matrix(read.csv("GSE88741-GPL16791_series_matrix.txt", skip = 72, header=T,sep="\t",row.names="ID_REF"))
-
-cts<-cts_prime[,c("GSM2344965","GSM2344966", "GSM2344968","GSM2344969", "GSM2344971","GSM2344972", "GSM2344974","GSM2344975")]
-
-cts<-cts[complete.cases(cts), ] 
-dds <- DESeqDataSetFromMatrix(countData = cts, 
-                              colData = coldata, 
-                              design = ~ condition) 
-dds <- dds[rowSums(counts(dds)) > 1,] 
-dds_analysis <- DESeq(dds) 
-res <- results(dds_analysis)
-
-res
-```
-
-### Q1.5
-```{r Q1.5}
-EnhancedVolcano(res,lab = rownames(res),x='log2FoldChange',y='padj',FCcutoff = 0.1,xlim=c(-5,5), ylim=c(0,20), title = 'diff analysis') 
-```
-
-### Q1.6
-```{r Q1.6}
-dds_vst <- vst(dds, blind = FALSE)
-top_genes <- head(order(rowVars(assay(dds_vst)), decreasing=TRUE), 30)
-top_genes_matrix<- assay(dds_vst)[top_genes,]
-row_means_mat<-rowMeans(top_genes_matrix)
-top_genes_matrix<-top_genes_matrix-row_means_mat
-top_genes_matrix<-t(top_genes_matrix)
-top_genes_matrix<-scale(top_genes_matrix)
-top_genes_matrix<-t(top_genes_matrix)
-col_row_names <-as.data.frame(colData(dds_vst)[, c("line_type","condition")])
-pheatmap(top_genes_matrix, annotation_col=col_row_names, x= 'padj<0.05', y='lfcThreshold=3')
-```
-
-### Q1.7
-```{r Q1.7}
-res_sub1 <- subset(res,padj<0.05)
-ordered<-head(res_sub1[order(res_sub1$log2FoldChange,decreasing = TRUE),])
-ordered
-```
-
-### The genes we chose: 
-
-GAGE12J (upregulated)- This gene belongs to a family expressed in a large variety of tumors whereas in normal tissues, expression is restricted to germ cells. These genes organized in clustered repeats, have a high degree of predicted sequence identity, but differ by scattered single nucleotide substitution. Their sequences contain either the antigenic peptide YYWPRPRRY or YRPRPRRY which is recognized by cytotoxic T-cells.
-
-CYSLTR2 (downregulated)- The cysteinyl leukotrienes are important mediators of human bronchial asthma. Studies have determined that cysteinyl leukotrienes activate at least 2 receptors. This encoded receptor is a member of the superfamily of G protein-coupled receptors. It seems to play a major role in endocrine and cardiovascular systems. 
 
 
 # Question 2
@@ -257,7 +169,12 @@ plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=6")
 
 
 
-plot(cutree(hc.result, k=7))
+plot(hc.result, cex = 0.6, hang = -1)
+
+hc.res <- hclust(dist(data.scaled), "ward.D")
+hc.ct <- cutree(hc.res, k=7)
+plot(hc.ct, cex = 0.6)
+rect.hclust(hc.ct, k = 7, border = 2:5)
 
 # plotting to hclust dendrogram
 #plot(hc.result)
@@ -271,7 +188,23 @@ The method in hclust() that seems to give a clustering that is more accurate to 
 
 # Q3.4
 
-# TODO - write the code for rand.index
+```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
+
+library("fossil")
+
+# new clusterings?
+km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
+# hierarchical clustering
+hc.result <- hclust(dist(data.scaled), "ward.D")
+# DBSCAN
+dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
+
+
+rand.index(km.result$cluster, hc.result$order)
+rand.index(km.result$cluster, dbscan.result$cluster)
+rand.index(dbscan.result$cluster, hc.result$order)
+
+```
 
 Did you get the same or different clusters using the three techniques? Find ways to present the similarities and differences between the clusterings. If the clusters are different what can explain the difference?
 
@@ -287,7 +220,7 @@ show it on a graph
 
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 
-sample_info <- readCSV("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_BioInf-Spr21-HW2/sample_info.csv")
+sample_info <- read.csv("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_BioInf-Spr21-HW2/sample_info.csv")
 
 # new kmeans?
 
@@ -301,8 +234,6 @@ table(sample_info$GENDER, km.result$cluster)
 
 ```
 
-
-# Q3.5
 explain the results
 
 
