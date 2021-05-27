@@ -91,8 +91,8 @@ sdy <- readRDS("C:/CS_Technion/236523-Intro_to_Bioinformatics/Spr21/Intro_to_Bio
 #print(t(sdy$expr))
 data <- na.omit(t(sdy$expr))
 data.scaled <- scale(data)
+data.dist <- dist(data.scaled, method="euclidean")
 #view(data.scaled)
-#dist.mat <- dist(data)
 
 # preparing tsne for later
 tsne = Rtsne(data.scaled)
@@ -101,10 +101,10 @@ tsne = Rtsne(data.scaled)
 
 set.seed(555)
 
-# kmeans
+# K-Means
 km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
-# hierarchical clustering
-hc.result <- hclust(dist(data.scaled), "ward.D")
+# hClust
+hc.result <- hclust(data.dist, "ward.D")
 # DBSCAN
 dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
@@ -117,61 +117,37 @@ dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
 # Plotting the clusters
 
-# kmeans
-#k=2
-km.result <- kmeans(data.scaled, centers = 2, nstart = 25)
-plot(tsne$Y, col=km.result$cluster, main = "k-means - k=2")
-#k=3
-km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
-plot(tsne$Y, col=km.result$cluster, main = "k-means - k=3")
-#k=4
-km.result <- kmeans(data.scaled, centers = 4, nstart = 25)
-plot(tsne$Y, col=km.result$cluster, main = "k-means - k=4")
-#k=5
-km.result <- kmeans(data.scaled, centers = 5, nstart = 25)
-plot(tsne$Y, col=km.result$cluster, main = "k-means - k=5")
+# K-Means
+k_values <- list(2,3,4,5,6,7)
+for(k in k_values){
+  km.result <- kmeans(data.scaled, centers = k, nstart = 25)
+  plot(tsne$Y, col=km.result$cluster, main = paste("K-Means clustering: K=",k))
+}
 
-
-# hierarchical clustering
-#method="ward.D"
-hc.result <- hclust(dist(data.scaled), "ward.D")
-plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=ward.D")
-plot(hc.result, cex = 0.6, hang = -1)
-#method="ave"
-hc.result <- hclust(dist(data.scaled), "ave")
-plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=average")
-plot(hc.result)
-#method="ward.D2"
-hc.result <- hclust(dist(data.scaled), "ward.D2")
-plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=ward.D2")
-plot(hc.result)
-#method="centroid"
-hc.result <- hclust(dist(data.scaled), "centroid")
-plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=centroid")
-plot(hc.result)
-
+# hClust
+method_values <- list("complete","ave","ward.D","ward.D2","centroid")
+for(m in method_values){
+  hc.result <- hclust(data.dist, method=m)
+  plot(hc.result, cex = 0.6, hang = -1)
+  plot(tsne$Y, col=hc.result$order, main = paste( "Hierarchical clustering: method=",m))
+}
 
 # DBSCAN
-#eps=1,minpts=4
-dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
-plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=1, minpts=4")
-#eps=0.5,minpts=4
-dbscan.result <- dbscan(tsne$Y, eps = 0.5, minPts = 4)
-plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=4")
-#eps=1,minpts=6
-dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 6)
-plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=1, minpts=6")
-#eps=0.5,minpts=6
-dbscan.result <- dbscan(tsne$Y, eps = 0.5, minPts = 6)
-plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=6")
-
+eps_values <- list(0.4,0.7,1)
+minpts_values <- list(4,6)
+for(e in eps_values){
+  for(mp in minpts_values){
+    dbscan.result <- dbscan(tsne$Y, eps = e, minPts = mp)
+    plot(tsne$Y, col=dbscan.result$cluster, main = paste("DBSCAN clustering: eps=",e," ,minPts=",mp))
+  }
+}
 
 
 
 
 plot(hc.result, cex = 0.6, hang = -1)
 
-hc.res <- hclust(dist(data.scaled), "ward.D")
+hc.res <- hclust(data.dist, "ward.D")
 hc.ct <- cutree(hc.res, k=7)
 plot(hc.ct, cex = 0.6)
 rect.hclust(hc.ct, k = 7, border = 2:5)
@@ -195,7 +171,7 @@ library("fossil")
 # new clusterings?
 km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
 # hierarchical clustering
-hc.result <- hclust(dist(data.scaled), "ward.D")
+hc.result <- hclust(data.dist, "complete")
 # DBSCAN
 dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
