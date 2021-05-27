@@ -102,11 +102,11 @@ tsne = Rtsne(data.scaled)
 set.seed(555)
 
 # K-Means
-km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
+#km.result <- kmeans(data.scaled, centers = 3, nstart = 25)
 # hClust
-hc.result <- hclust(data.dist, "ward.D")
+#hc.result <- hclust(data.dist, "ward.D")
 # DBSCAN
-dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
+#dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
 #dbscan.result
 
@@ -115,6 +115,8 @@ dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
 #Q3.2+3.3
 
+
+  
 # Plotting the clusters
 
 # K-Means
@@ -125,12 +127,25 @@ for(k in k_values){
 }
 
 # hClust
-method_values <- list("complete","ave","ward.D","ward.D2","centroid")
+method_values <- list("complete","average","ward.D","ward.D2","centroid")
 for(m in method_values){
   hc.result <- hclust(data.dist, method=m)
-  plot(hc.result, cex = 0.6, hang = -1)
-  plot(tsne$Y, col=hc.result$order, main = paste( "Hierarchical clustering: method=",m))
+  # had trouble with looping over cluster for some reason, so did it manually
+  cl3 <- cutree(hc.result, k=3)
+  cl5 <- cutree(hc.result, k=5)
+  cl7 <- cutree(hc.result, k=7)
+  hc.clusters <- list(cl3, cl5, cl7)
+  for(cl in hc.clusters){
+      plot(tsne$Y, col=cl, main = paste( "Hierarchical clustering: method=",m))
+  }
+  #plot(hc.result, cex = 0.6, hang = -1)
 }
+
+# plotting a dendrogram
+best_k <- 7
+plot(hc.result, cex = 0.6, hang = -1)
+rect.hclust(hc.result, k = best_k, border = 2:5)
+
 
 # DBSCAN
 eps_values <- list(0.4,0.7,1)
@@ -142,18 +157,6 @@ for(e in eps_values){
   }
 }
 
-
-
-
-plot(hc.result, cex = 0.6, hang = -1)
-
-hc.res <- hclust(data.dist, "ward.D")
-hc.ct <- cutree(hc.res, k=7)
-plot(hc.ct, cex = 0.6)
-rect.hclust(hc.ct, k = 7, border = 2:5)
-
-# plotting to hclust dendrogram
-#plot(hc.result)
 
 
 ```
