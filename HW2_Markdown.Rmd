@@ -103,15 +103,8 @@ GAGE12J (upregulated)- This gene belongs to a family expressed in a large variet
 CYSLTR2 (downregulated)- The cysteinyl leukotrienes are important mediators of human bronchial asthma. Studies have determined that cysteinyl leukotrienes activate at least 2 receptors. This encoded receptor is a member of the superfamily of G protein-coupled receptors. It seems to play a major role in endocrine and cardiovascular systems. 
 
 
-
-### Q1.1
-```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
-
-```
-
 # Question 2
 
-# TODO - Roy
 Following is the code and answers for the questions under the "Question 2" Section - as instructed in the assignment:
 
 ### Q2.1
@@ -159,7 +152,6 @@ UniProt database
 NCBI's Entrez molecular sequence database
 OMIM - Online Mendelian Inheritance in Man database
 
-
 ### Q2.3.2
 If we paste the name of this gene manually into an Excel sheet, meaning we paste "MARCH7" into a cell inside the sheet, a possible problem we might encounter is that Excel would recognize the name as a date - March 7 - and refer to it as one.
 In such case, instead of referring to the gene's name "MARCH7" as its ID (or as a unique identifier), Excel would mistakenly refer to it as a date - which might cause us problem later on in our data analysis process (e.g. if we want to compare the gene in our excel sheet to its appearance in a database - but R would recognize the identifiers as two different ones because of their type etc.). 
@@ -169,8 +161,7 @@ In such case, instead of referring to the gene's name "MARCH7" as its ID (or as 
 
 # Question 3
 
-# TODO
-Following is the code for generating the GRanges objects - as instructed in the assignment:
+Following is the code and answers for the questions under the "Question 3" Section - as instructed in the assignment:
 
 ### Q3.1
 ```{r,echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
@@ -205,19 +196,14 @@ hc.result <- hclust(dist(data.scaled), "ward.D")
 # DBSCAN
 dbscan.result <- dbscan(tsne$Y, eps = 1, minPts = 4)
 
-
-# Plotting the clusters
-
-#plot(tsne$Y, col=km.result$cluster)
-#plot(tsne$Y, col=hc.result$order)
-#plot(tsne$Y, col=dbscan.result$cluster)
-
 #dbscan.result
 
 
 
 
 #Q3.2+3.3
+
+# Plotting the clusters
 
 # kmeans
 #k=2
@@ -238,7 +224,7 @@ plot(tsne$Y, col=km.result$cluster, main = "k-means - k=5")
 #method="ward.D"
 hc.result <- hclust(dist(data.scaled), "ward.D")
 plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=ward.D")
-plot(hc.result)
+plot(hc.result, cex = 0.6, hang = -1)
 #method="ave"
 hc.result <- hclust(dist(data.scaled), "ave")
 plot(tsne$Y, col=hc.result$order, main = "hierarchical - method=average")
@@ -269,6 +255,9 @@ plot(tsne$Y, col=dbscan.result$cluster, main = "DBSCAN - eps=0.5, minpts=6")
 
 
 
+
+
+plot(cutree(hc.result, k=7))
 
 # plotting to hclust dendrogram
 #plot(hc.result)
